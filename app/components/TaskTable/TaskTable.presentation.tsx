@@ -1,11 +1,13 @@
 "use client";
 
-import { Task } from "@/app/types/task";
+import { useMemo } from "react";
 import { ActionIcon, Group, Tooltip } from "@mantine/core";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { Task } from "@/app/shared/types/task";
+import { CustomField } from "@/app/shared/types/custom-field";
+
 import { Table } from "../Common/Table/Table";
 import styles from "./TaskTable.module.css";
-import { useMemo } from "react";
 
 interface TaskTablePresentationProps {
   tasks: Task[];
@@ -14,6 +16,7 @@ interface TaskTablePresentationProps {
   sortColumn?: string;
   sortDirection?: "asc" | "desc";
   onSort?: (column: string) => void;
+  customFields: CustomField[];
 }
 
 export function TaskTablePresentation({
@@ -23,6 +26,7 @@ export function TaskTablePresentation({
   sortColumn,
   sortDirection,
   onSort,
+  customFields,
 }: TaskTablePresentationProps) {
   const columns = useMemo(
     () => [
@@ -30,7 +34,6 @@ export function TaskTablePresentation({
         key: "title",
         header: "Title",
         render: (task: Task) => task.title,
-        width: "40%",
         sortable: true,
       },
       {
@@ -41,7 +44,6 @@ export function TaskTablePresentation({
             {task.priority}
           </span>
         ),
-        width: "20%",
         sortable: true,
       },
       {
@@ -50,9 +52,23 @@ export function TaskTablePresentation({
         render: (task: Task) => (
           <span className={styles[`status-${task.status}`]}>{task.status}</span>
         ),
-        width: "20%",
         sortable: true,
       },
+      ...customFields.map((field) => ({
+        key: field.id,
+        header: field.name,
+        render: (task: Task) =>
+          field.type === "checkbox" ? (
+            <input
+              type="checkbox"
+              checked={!!task.customFields?.[field.name]}
+              disabled
+            />
+          ) : (
+            task.customFields?.[field.name] || "-"
+          ),
+        sortable: true,
+      })),
       {
         key: "actions",
         header: "Actions",
@@ -85,10 +101,9 @@ export function TaskTablePresentation({
             </Tooltip>
           </Group>
         ),
-        width: "20%",
       },
     ],
-    [onDelete, onEdit]
+    [customFields, onEdit, onDelete]
   );
 
   return (

@@ -6,4 +6,5 @@ export interface Task {
   title: string;
   priority: TaskPriority;
   status: TaskStatus;
+  customFields?: Record<string, string | number | boolean>;
 }

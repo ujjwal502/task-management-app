@@ -14,7 +14,9 @@ export function Form({
   cancelLabel = "Cancel",
   title,
 }: FormProps) {
-  const [formData, setFormData] = useState(initialValues);
+  console.log("initialValues in the firm", initialValues);
+  const [formData, setFormData] =
+    useState<Record<string, string | boolean>>(initialValues);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -24,18 +26,43 @@ export function Form({
   const renderField = (field: Field) => {
     switch (field.type) {
       case "text":
+      case "number":
         return (
           <TextInput
             key={field.name}
+            type={field.type}
             required={field.required}
             label={field.label}
             placeholder={field.placeholder}
-            value={formData[field.name] || ""}
+            value={String(formData[field.name] || "")}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, [field.name]: e.target.value }))
             }
             className={styles.input}
           />
+        );
+      case "checkbox":
+        console.log("checkbox field", field);
+        return (
+          <div key={field.name} className={styles.formField}>
+            <label className={styles.checkboxLabel}>
+              <div className={styles.checkboxWrapper}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(formData[field.name])}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      [field.name]: e.target.checked,
+                    }))
+                  }
+                  className={styles.checkboxInput}
+                />
+                <span className={styles.checkboxCustom} />
+              </div>
+              <span className={styles.checkboxText}>{field.label}</span>
+            </label>
+          </div>
         );
       case "radio":
         return (
@@ -65,6 +92,36 @@ export function Form({
             </div>
           </div>
         );
+      case "select":
+        return (
+          <div key={field.name} className={styles.formField}>
+            <label className={styles.label}>
+              {field.label}
+              {field.required && <span className={styles.required}> *</span>}
+            </label>
+            <select
+              name={field.name}
+              value={String(formData[field.name] || "")}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  [field.name]: e.target.value,
+                }))
+              }
+              className={styles.select}
+              required={field.required}
+            >
+              <option value="">{field.placeholder || "Select..."}</option>
+              {field.options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      default:
+        return null;
     }
   };
 

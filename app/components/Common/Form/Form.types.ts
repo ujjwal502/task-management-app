@@ -1,10 +1,10 @@
-export type FieldType = "text" | "radio";
+export type FieldType = "text" | "radio" | "checkbox" | "number" | "select";
 
-interface BaseField {
+export interface BaseField {
+  type: FieldType;
   name: string;
   label: string;
   required?: boolean;
-  type: FieldType;
 }
 
 export interface TextField extends BaseField {
@@ -14,18 +14,35 @@ export interface TextField extends BaseField {
 
 export interface RadioField extends BaseField {
   type: "radio";
-  options: {
-    value: string;
-    label: string;
-  }[];
+  options: { value: string; label: string }[];
 }
 
-export type Field = TextField | RadioField;
+export interface CheckboxField extends BaseField {
+  type: "checkbox";
+}
+
+export interface NumberField extends BaseField {
+  type: "number";
+  placeholder?: string;
+}
+
+export interface SelectField extends BaseField {
+  type: "select";
+  options: { value: string; label: string }[];
+  placeholder?: string;
+}
+
+export type Field =
+  | TextField
+  | RadioField
+  | CheckboxField
+  | NumberField
+  | SelectField;
 
 export interface FormProps {
   fields: Field[];
-  onSubmit: (values: Record<string, string>) => void;
-  initialValues?: Record<string, string>;
+  onSubmit: (values: Record<string, string | boolean>) => void;
+  initialValues?: Record<string, string | boolean>;
   submitLabel?: string;
   onCancel?: () => void;
   cancelLabel?: string;

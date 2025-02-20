@@ -95,3 +95,77 @@
   color: var(--mantine-color-gray-9);
   font-weight: 500;
 }
+
+.select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-sm);
+  font-size: var(--mantine-font-size-sm);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--mantine-color-blue-5);
+}
+
+.required {
+  color: var(--mantine-color-red-6);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-sm);
+  transition: background-color 0.2s;
+}
+
+.checkboxWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.checkboxInput {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkboxCustom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--mantine-color-gray-4);
+  border-radius: 4px;
+  margin-right: var(--mantine-spacing-sm);
+  position: relative;
+  transition: all 0.2s;
+}
+
+.checkboxInput:checked + .checkboxCustom {
+  background-color: var(--mantine-primary-color-filled);
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.checkboxInput:checked + .checkboxCustom::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkboxText {
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-gray-7);
+}
+
+.checkboxLabel:hover .checkboxCustom {
+  border-color: var(--mantine-primary-color-filled);
+}

@@ -1,12 +1,18 @@
 "use client";
-
-import { Task } from "@/app/types/task";
+import { useState, useMemo, useEffect } from "react";
+import { Task } from "@/app/shared/types/task";
 import { Box, Button, Group, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
+import { IconCheck, IconX } from "@tabler/icons-react";
+
+import { tasksStorage } from "@/app/shared/utils/tasks-storage";
+import { CustomField } from "@/app/shared/types/custom-field";
+
 import { TaskTablePresentation } from "./TaskTable.presentation";
+import { CustomFieldsManager } from "../CustomFields";
 import styles from "./TaskTable.module.css";
 import { TaskForm } from "../TaskForm/TaskForm";
-import { useState, useMemo } from "react";
 import { TaskTableControls } from "./TaskTableControls";
 import { TaskTablePagination } from "./TaskTablePagination";
 import { ConfirmationModal } from "../Common/ConfirmationModal/ConfirmationModal";
@@ -16,7 +22,26 @@ import { PRIORITY_ORDER, STATUS_ORDER } from "./TaskTable.utils";
 export function TaskTableContainer({
   tasks: initialTasks,
 }: TaskTableContainerProps) {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [customFields, setCustomFields] = useState<CustomField[]>(() => {
+    const savedFields = localStorage.getItem("customFields");
+    return savedFields ? JSON.parse(savedFields) : [];
+  });
+
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = tasksStorage.getTasks();
+    console.log("Loading saved tasks:", savedTasks);
+    return savedTasks.length > 0 ? savedTasks : initialTasks;
+  });
+
+  useEffect(() => {
+    console.log("Saving tasks in effect:", tasks);
+    tasksStorage.setTasks(tasks);
+  }, [tasks]);
+
+  useEffect(() => {
+    localStorage.setItem("customFields", JSON.stringify(customFields));
+  }, [customFields]);
+
   const [opened, { open, close }] = useDisclosure(false);
   const [
     deleteModalOpened,
@@ -31,6 +56,11 @@ export function TaskTableContainer({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
+
+  const [
+    customFieldsModalOpened,
+    { open: openCustomFieldsModal, close: closeCustomFieldsModal },
+  ] = useDisclosure(false);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
@@ -58,9 +88,42 @@ export function TaskTableContainer({
     setSortDirection(isAsc ? "desc" : "asc");
     setSortColumn(column);
 
+    const customField = customFields.find((field) => field.id === column);
+    const fieldName = customField?.name || column;
+
     const sortedTasks = [...tasks].sort((a, b) => {
-      const aValue = a[column as keyof Task];
-      const bValue = b[column as keyof Task];
+      let aValue: string | number = String(a[column as keyof Task] || "");
+      let bValue: string | number = String(b[column as keyof Task] || "");
+
+      if (customField && a.customFields && b.customFields) {
+        const aCustom = a.customFields[fieldName];
+        const bCustom = b.customFields[fieldName];
+
+        if (customField.type === "number") {
+          if (aCustom === undefined && bCustom === undefined) return 0;
+          if (aCustom === undefined) return isAsc ? 1 : -1;
+          if (bCustom === undefined) return isAsc ? -1 : 1;
+
+          return isAsc
+            ? Number(aCustom || 0) - Number(bCustom || 0)
+            : Number(bCustom || 0) - Number(aCustom || 0);
+        }
+
+        if (customField.type === "checkbox") {
+          const aCheck = Boolean(aCustom);
+          const bCheck = Boolean(bCustom);
+          return isAsc
+            ? Number(aCheck) - Number(bCheck)
+            : Number(bCheck) - Number(aCheck);
+        }
+
+        if (aCustom === undefined && bCustom === undefined) return 0;
+        if (aCustom === undefined) return isAsc ? 1 : -1;
+        if (bCustom === undefined) return isAsc ? -1 : 1;
+
+        aValue = String(aCustom);
+        bValue = String(bCustom);
+      }
 
       if (column === "priority") {
         const priorityA = PRIORITY_ORDER[aValue as keyof typeof PRIORITY_ORDER];
@@ -74,9 +137,11 @@ export function TaskTableContainer({
         return isAsc ? statusA - statusB : statusB - statusA;
       }
 
-      if (aValue < bValue) return isAsc ? -1 : 1;
-      if (aValue > bValue) return isAsc ? 1 : -1;
-      return 0;
+      aValue = String(aValue || "");
+      bValue = String(bValue || "");
+      return isAsc
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
     });
 
     setTasks(sortedTasks);
@@ -89,6 +154,13 @@ export function TaskTableContainer({
     };
     setTasks([...tasks, task]);
     close();
+
+    notifications.show({
+      title: "Task Created",
+      message: `Task "${task.title}" has been created successfully`,
+      color: "green",
+      icon: <IconCheck size={16} />,
+    });
   };
 
   const handleEditTask = (taskId: number) => {
@@ -109,6 +181,13 @@ export function TaskTableContainer({
     );
     setEditingTask(null);
     close();
+
+    notifications.show({
+      title: "Task Updated",
+      message: `Task "${updatedTask.title}" has been updated successfully`,
+      color: "blue",
+      icon: <IconCheck size={16} />,
+    });
   };
 
   const handleDeleteClick = (taskId: number) => {
@@ -118,9 +197,17 @@ export function TaskTableContainer({
 
   const handleConfirmDelete = () => {
     if (deletingTaskId) {
+      const taskToDelete = tasks.find((task) => task.id === deletingTaskId);
       setTasks(tasks.filter((task) => task.id !== deletingTaskId));
       setDeletingTaskId(null);
       closeDeleteModal();
+
+      notifications.show({
+        title: "Task Deleted",
+        message: `Task "${taskToDelete?.title}" has been deleted`,
+        color: "red",
+        icon: <IconX size={16} />,
+      });
     }
   };
 
@@ -133,6 +220,70 @@ export function TaskTableContainer({
     const newPageSize = Number(value);
     setPageSize(newPageSize);
     setCurrentPage(1);
+  };
+
+  const handleAddCustomField = (field: Omit<CustomField, "id">) => {
+    const newField: CustomField = {
+      ...field,
+      id: crypto.randomUUID(),
+    };
+
+    const updatedTasks = tasks.map((task) => {
+      const defaultValue = () => {
+        switch (field.type) {
+          case "number":
+            return 0;
+          case "checkbox":
+            return false;
+          case "text":
+          default:
+            return "";
+        }
+      };
+
+      return {
+        ...task,
+        customFields: {
+          ...task.customFields,
+          [newField.name]: defaultValue(),
+        },
+      };
+    });
+
+    console.log("Saving tasks with new custom field:", updatedTasks);
+    setTasks(updatedTasks);
+    tasksStorage.setTasks(updatedTasks);
+
+    setCustomFields((prev) => [...prev, newField]);
+
+    notifications.show({
+      title: "Custom Field Added",
+      message: `Custom field "${newField.name}" has been added successfully`,
+      color: "green",
+      icon: <IconCheck size={16} />,
+    });
+  };
+
+  const handleRemoveCustomField = (fieldId: string) => {
+    const fieldToRemove = customFields.find((field) => field.id === fieldId);
+    setCustomFields((prev) => prev.filter((field) => field.id !== fieldId));
+
+    const updatedTasks = tasks.map((task) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [fieldToRemove?.name || ""]: _, ...remainingCustomFields } =
+        task.customFields || {};
+      return { ...task, customFields: remainingCustomFields };
+    });
+
+    setTasks(updatedTasks);
+    tasksStorage.setTasks(updatedTasks);
+
+    notifications.show({
+      title: "Custom Field Removed",
+      message: `Custom field "${fieldToRemove?.name}" has been removed`,
+      color: "red",
+      icon: <IconX size={16} />,
+    });
   };
 
   if (!tasks.length) {
@@ -149,6 +300,9 @@ export function TaskTableContainer({
     <>
       <Group mb="md" justify="space-between">
         <Button onClick={open}>Create Task</Button>
+        <Button variant="light" onClick={openCustomFieldsModal}>
+          Manage Custom Fields
+        </Button>
         <TaskTableControls
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -166,6 +320,7 @@ export function TaskTableContainer({
         sortColumn={sortColumn}
         sortDirection={sortDirection}
         onSort={handleSort}
+        customFields={customFields}
       />
 
       <TaskTablePagination
@@ -185,6 +340,7 @@ export function TaskTableContainer({
         onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
         initialValues={editingTask ?? undefined}
         title={editingTask ? "Edit Task" : "Create Task"}
+        customFields={customFields}
       />
 
       <ConfirmationModal
@@ -196,6 +352,14 @@ export function TaskTableContainer({
         onConfirm={handleConfirmDelete}
         title="Delete Task"
         message="Are you sure you want to delete this task? This action cannot be undone."
+      />
+
+      <CustomFieldsManager
+        opened={customFieldsModalOpened}
+        onClose={closeCustomFieldsModal}
+        customFields={customFields}
+        onAddField={handleAddCustomField}
+        onRemoveField={handleRemoveCustomField}
       />
     </>
   );

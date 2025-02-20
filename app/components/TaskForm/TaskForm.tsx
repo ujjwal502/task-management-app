@@ -1,6 +1,6 @@
 "use client";
 
-import { TaskPriority, TaskStatus } from "@/app/types/task";
+import { TaskPriority, TaskStatus } from "@/app/shared/types/task";
 import { Modal } from "@mantine/core";
 import { Form } from "../Common/Form/Form";
 import { Field } from "../Common/Form/Form.types";
@@ -13,6 +13,7 @@ export function TaskForm({
   onSubmit,
   initialValues,
   title,
+  customFields = [],
 }: TaskFormProps) {
   const fields: Field[] = useMemo(
     () => [
@@ -47,17 +48,55 @@ export function TaskForm({
           { value: "completed", label: "Completed" },
         ],
       },
+      ...customFields.map((field): Field => {
+        switch (field.type) {
+          case "checkbox":
+            return {
+              type: "checkbox",
+              name: field.name,
+              label: field.name,
+            };
+          case "number":
+            return {
+              type: "number",
+              name: field.name,
+              label: field.name,
+              placeholder: `Enter ${field.name.toLowerCase()}`,
+            };
+          default:
+            return {
+              type: "text",
+              name: field.name,
+              label: field.name,
+              placeholder: `Enter ${field.name.toLowerCase()}`,
+            };
+        }
+      }),
     ],
-    []
+    [customFields]
   );
 
-  const handleSubmit = (values: Record<string, string>) => {
+  const handleSubmit = (values: Record<string, string | boolean>) => {
+    const customFieldValues: Record<string, string | number | boolean> = {};
+    customFields.forEach((field) => {
+      if (field.type === "number") {
+        customFieldValues[field.name] = Number(values[field.name]);
+      } else if (field.type === "checkbox") {
+        customFieldValues[field.name] = Boolean(values[field.name]);
+      } else {
+        customFieldValues[field.name] = String(values[field.name]);
+      }
+    });
+
     onSubmit({
-      title: values.title,
-      priority: values.priority as TaskPriority,
-      status: values.status as TaskStatus,
+      title: String(values.title),
+      priority: String(values.priority) as TaskPriority,
+      status: String(values.status) as TaskStatus,
+      customFields: customFieldValues,
     });
   };
+
+  console.log("initialValues", initialValues);
 
   return (
     <Modal
@@ -80,6 +119,7 @@ export function TaskForm({
             title: initialValues.title,
             priority: initialValues.priority,
             status: initialValues.status,
+            ...initialValues.customFields,
           }
         }
         onCancel={onClose}
