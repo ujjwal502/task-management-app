@@ -5,7 +5,7 @@ interface TaskFormProps {
   opened: boolean;
   onClose: () => void;
   onSubmit: (task: Omit<Task, "id">) => void;
-  initialValues?: Task;
+  initialValues?: Partial<Task>;
   title: string;
   customFields?: CustomField[];
 }

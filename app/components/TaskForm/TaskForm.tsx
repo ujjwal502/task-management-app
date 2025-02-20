@@ -114,10 +114,10 @@ export function TaskForm({
         onSubmit={handleSubmit}
         initialValues={
           initialValues && {
-            title: initialValues.title,
-            priority: initialValues.priority,
-            status: initialValues.status,
-            ...initialValues.customFields,
+            title: initialValues.title ?? "",
+            priority: initialValues.priority ?? TaskPriority.NONE,
+            status: initialValues.status ?? TaskStatus.NOT_STARTED,
+            ...(initialValues.customFields ?? {}),
           }
         }
         onCancel={onClose}

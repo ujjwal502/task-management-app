@@ -5,6 +5,8 @@ import { TaskPriority, TaskStatus } from "@/app/shared/types/enums";
 import { DragEvent, useState, useEffect } from "react";
 import type { KanbanBoardProps, ColumnConfig } from "./KanbanBoard.types";
 import { KanbanBoardPresentation } from "./KanbanBoard.presentation";
+import { useDisclosure } from "@mantine/hooks";
+import { TaskForm } from "../TaskForm/TaskForm";
 
 const PRIORITY_COLUMNS: TaskPriority[] = [
   TaskPriority.URGENT,
@@ -217,28 +219,60 @@ export function KanbanBoardContainer({
     return filtered;
   };
 
-  // When creating a new task in a column, I set some sensible defaults
+  // Add new state for task form
+  const [opened, { open, close }] = useDisclosure(false);
+  const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority | null>(
+    null
+  );
+
+  // Update the create task handler
   const handleCreateTask = (priority: TaskPriority) => {
-    onTaskCreate({
-      title: "New Task",
-      priority,
-      status: TaskStatus.NOT_STARTED, // Always start in "not started" state
-    });
+    setNewTaskPriority(priority);
+    open();
+  };
+
+  // Add handler for form submission
+  const handleSubmitTask = (task: Omit<Task, "id">) => {
+    onTaskCreate(task);
+    close();
+    setNewTaskPriority(null);
   };
 
   return (
-    <KanbanBoardPresentation
-      priorityColumns={PRIORITY_COLUMNS}
-      statusOptions={STATUS_OPTIONS}
-      columnConfigs={columnConfigs}
-      isLoading={isLoading}
-      onDragStart={handleDragStart}
-      onDrop={handleDrop}
-      onColumnSort={handleColumnSort}
-      onColumnFilter={handleColumnFilter}
-      onCreateTask={handleCreateTask}
-      onDeleteTask={onTaskDelete}
-      getFilteredAndSortedTasks={getFilteredAndSortedTasks}
-    />
+    <>
+      <KanbanBoardPresentation
+        priorityColumns={PRIORITY_COLUMNS}
+        statusOptions={STATUS_OPTIONS}
+        columnConfigs={columnConfigs}
+        isLoading={isLoading}
+        onDragStart={handleDragStart}
+        onDrop={handleDrop}
+        onColumnSort={handleColumnSort}
+        onColumnFilter={handleColumnFilter}
+        onCreateTask={handleCreateTask}
+        onDeleteTask={onTaskDelete}
+        getFilteredAndSortedTasks={getFilteredAndSortedTasks}
+      />
+
+      <TaskForm
+        opened={opened}
+        onClose={() => {
+          close();
+          setNewTaskPriority(null);
+        }}
+        onSubmit={handleSubmitTask}
+        initialValues={
+          newTaskPriority
+            ? {
+                title: "",
+                priority: newTaskPriority,
+                status: TaskStatus.NOT_STARTED,
+                customFields: {},
+              }
+            : undefined
+        }
+        title="Create Task"
+      />
+    </>
   );
 }
