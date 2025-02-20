@@ -1,12 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Task } from "@/app/shared/types/task";
 import { TaskPriority, TaskStatus } from "@/app/shared/types/enums";
 import { DragEvent, useState, useEffect } from "react";
 import type { KanbanBoardProps, ColumnConfig } from "./KanbanBoard.types";
 import { KanbanBoardPresentation } from "./KanbanBoard.presentation";
 import { useDisclosure } from "@mantine/hooks";
-import { TaskForm } from "../TaskForm/TaskForm";
 
 // These are the options users can select from when filtering tasks by status
 // I'm using human-readable labels for the UI while keeping enum values for the backend
@@ -15,6 +15,13 @@ const STATUS_OPTIONS = [
   { value: TaskStatus.IN_PROGRESS, label: "In Progress" },
   { value: TaskStatus.COMPLETED, label: "Completed" },
 ];
+
+const TaskForm = dynamic(
+  () => import("../TaskForm/TaskForm").then((mod) => mod.TaskForm),
+  {
+    ssr: false,
+  }
+);
 
 export function KanbanBoardContainer({
   tasks,

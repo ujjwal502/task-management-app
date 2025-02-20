@@ -1,15 +1,38 @@
 "use client";
 
 import { Title, Box, Skeleton, Group } from "@mantine/core";
-import { TaskTable } from "@/app/components/TaskTable";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { tasksStorage } from "@/app/shared/utils/tasks-storage";
 import { Task } from "@/app/shared/types/task";
-import { StartFreshButton } from "./StartFreshButton";
 
 interface TaskManagerContainerProps {
   initialTasks: Task[];
 }
+
+const TaskTable = dynamic(
+  () => import("@/app/components/TaskTable").then((mod) => mod.TaskTable),
+  {
+    loading: () => (
+      <>
+        <Skeleton
+          height={40}
+          radius="sm"
+          mb="md"
+          aria-label="Loading task controls..."
+        />
+        <Skeleton height={400} radius="sm" aria-label="Loading task list..." />
+      </>
+    ),
+  }
+);
+
+const StartFreshButton = dynamic(
+  () => import("./StartFreshButton").then((mod) => mod.StartFreshButton),
+  {
+    ssr: false,
+  }
+);
 
 export function TaskManagerContainer({
   initialTasks,
@@ -31,23 +54,7 @@ export function TaskManagerContainer({
           <StartFreshButton />
         </Group>
       </Box>
-      {isLoading ? (
-        <>
-          <Skeleton
-            height={40}
-            radius="sm"
-            mb="md"
-            aria-label="Loading task controls..."
-          />
-          <Skeleton
-            height={400}
-            radius="sm"
-            aria-label="Loading task list..."
-          />
-        </>
-      ) : (
-        <TaskTable tasks={tasks} />
-      )}
+      {isLoading ? <TaskTable tasks={tasks} /> : <TaskTable tasks={tasks} />}
     </Box>
   );
 }

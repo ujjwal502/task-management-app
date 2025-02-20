@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "analyze": "cross-env ANALYZE=true next build",
+    "build:prod": "next build && next-bundle-analyzer"
   },
   "dependencies": {
     "@mantine/core": "^7.16.3",
@@ -38,6 +40,9 @@
     "postcss-preset-mantine": "^1.17.0",
     "postcss-simple-vars": "^7.0.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@next/bundle-analyzer": "^15.1.7",
+    "critters": "^0.0.20",
+    "cross-env": "^7.0.3"
   }
 }
