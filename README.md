@@ -177,9 +177,82 @@ pnpm dev
 2. **Local Storage**: Chose browser local storage for data persistence
 
 3. **Custom Fields Implementation**: Built a flexible schema system that:
+
    - Maintains backward compatibility
    - Supports different data types
    - Preserves existing task data
+
+   ## Performance Optimizations
+
+This project implements several advanced performance optimization techniques to ensure optimal loading times and efficient resource utilization:
+
+### 1. Code Splitting & Dynamic Imports
+
+- Implemented intelligent code splitting using Next.js dynamic imports
+- Lazy load components that aren't needed for initial render:
+  ```typescript
+  const TaskForm = dynamic(
+    () => import("../TaskForm/TaskForm").then((mod) => mod.TaskForm),
+    { ssr: false }
+  );
+  ```
+- Components like TaskTable and KanbanBoard are loaded on demand, reducing initial bundle size
+
+### 2. Bundle Optimization
+
+- Configured advanced Webpack optimizations for production builds:
+  - Tree shaking enabled for removing unused code
+  - Chunk splitting strategy implemented with optimal size limits (20KB - 244KB)
+  - Separate chunks for framework code (React, Next.js)
+  - Vendor code splitting for better caching
+  ```typescript
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      minSize: 20000,
+      maxSize: 244000,
+      // ... optimized caching groups
+    }
+  }
+  ```
+
+### 3. Package Optimizations
+
+- Implemented selective imports for UI libraries
+- Optimized package imports for:
+  - @mantine/core
+  - @mantine/hooks
+  - @tabler/icons-react
+- Configured experimental CSS optimization
+
+### 4. Build-time Optimizations
+
+- Enabled production-specific optimizations:
+  - Console statements removed in production
+  - Dead code elimination
+  - Optimized CSS delivery using Critters
+- Implemented bundle analysis for continuous optimization:
+  ```bash
+  npm run analyze   # Visualize bundle composition
+  ```
+
+### 5. Runtime Performance
+
+- Implemented efficient state management
+- Optimized re-renders using React.memo and useMemo where appropriate
+- Configured proper caching strategies
+
+### 6. Monitoring & Analysis
+
+- Bundle analyzer integration for size monitoring
+- Chunk splitting visualization
+- Performance metrics tracking
+
+### 7. Development Workflow
+
+- Development builds maintain source maps for debugging
+- Production builds are fully optimized for performance
+- Cross-environment consistency maintained using cross-env
 
 ### Assumptions
 
