@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Task } from "@/app/shared/types/task";
 import { Box, Button, Group, Text, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -298,6 +298,10 @@ export function TaskTableContainer({
       icon: <IconX size={16} />,
     });
   };
+
+  useEffect(() => {
+    localStorage.setItem("customFields", JSON.stringify(customFields));
+  }, [customFields]);
 
   if (!tasks.length) {
     return (
