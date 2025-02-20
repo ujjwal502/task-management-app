@@ -260,7 +260,7 @@ This project implements several advanced performance optimization techniques to 
 2. **Data Volume**: Designed to handle hundreds of tasks efficiently in the browser
 3. **User Preferences**: Users prefer immediate feedback and quick interactions
 
-## 📖 References & Documentation
+## References & Documentation
 
 - [Mantine UI](https://mantine.dev/)
 - [Next.js](https://nextjs.org/)
