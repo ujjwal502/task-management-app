@@ -24,6 +24,8 @@ import { useHotkeys } from "@mantine/hooks";
 import { ViewToggle } from "../ViewToggle/ViewToggle";
 import { ViewMode } from "@/app/shared/types/enums";
 import { KanbanBoard } from "../KanbanBoard";
+import { filterStorage } from "@/app/shared/utils/filter-storage";
+import { customFieldsStorage } from "@/app/shared/utils/custom-fields-storage";
 
 export function TaskTableContainer({
   tasks: initialTasks,
@@ -32,8 +34,7 @@ export function TaskTableContainer({
     useHistory(initialTasks);
 
   const [customFields, setCustomFields] = useState<CustomField[]>(() => {
-    const savedFields = localStorage.getItem("customFields");
-    return savedFields ? JSON.parse(savedFields) : [];
+    return customFieldsStorage.getCustomFields();
   });
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -42,13 +43,34 @@ export function TaskTableContainer({
     { open: openDeleteModal, close: closeDeleteModal },
   ] = useDisclosure(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [sortColumn, setSortColumn] = useState<string | undefined>();
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPriorities, setSelectedPriorities] = useState<string[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState(() => {
+    const savedState = filterStorage.getFilterState();
+    return savedState.searchQuery || "";
+  });
+  const [selectedPriorities, setSelectedPriorities] = useState<string[]>(() => {
+    const savedState = filterStorage.getFilterState();
+    return savedState.selectedPriorities || [];
+  });
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(() => {
+    const savedState = filterStorage.getFilterState();
+    return savedState.selectedStatuses || [];
+  });
+  const [sortColumn, setSortColumn] = useState<string | undefined>(() => {
+    const savedState = filterStorage.getFilterState();
+    return savedState.sortColumn;
+  });
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(() => {
+    const savedState = filterStorage.getFilterState();
+    return savedState.sortDirection || "asc";
+  });
+  const [currentPage, setCurrentPage] = useState(() => {
+    const savedState = filterStorage.getFilterState();
+    return savedState.currentPage || 1;
+  });
+  const [pageSize, setPageSize] = useState(() => {
+    const savedState = filterStorage.getFilterState();
+    return savedState.pageSize || 10;
+  });
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
 
   const [
@@ -64,6 +86,8 @@ export function TaskTableContainer({
   ]);
 
   const filteredTasks = useMemo(() => {
+    if (view !== "table") return tasks;
+
     return tasks.filter((task) => {
       const matchesSearch = task.title
         .toLowerCase()
@@ -76,7 +100,7 @@ export function TaskTableContainer({
 
       return matchesSearch && matchesPriority && matchesStatus;
     });
-  }, [tasks, searchQuery, selectedPriorities, selectedStatuses]);
+  }, [tasks, searchQuery, selectedPriorities, selectedStatuses, view]);
 
   const paginatedTasks = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -298,9 +322,47 @@ export function TaskTableContainer({
     });
   };
 
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handlePrioritiesChange = (values: string[]) => {
+    setSelectedPriorities(values);
+    setCurrentPage(1);
+  };
+
+  const handleStatusesChange = (values: string[]) => {
+    setSelectedStatuses(values);
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
-    localStorage.setItem("customFields", JSON.stringify(customFields));
+    customFieldsStorage.setCustomFields(customFields);
   }, [customFields]);
+
+  useEffect(() => {
+    if (view === "table") {
+      filterStorage.setFilterState({
+        searchQuery,
+        selectedPriorities,
+        selectedStatuses,
+        sortColumn,
+        sortDirection,
+        currentPage,
+        pageSize,
+      });
+    }
+  }, [
+    searchQuery,
+    selectedPriorities,
+    selectedStatuses,
+    sortColumn,
+    sortDirection,
+    currentPage,
+    pageSize,
+    view,
+  ]);
 
   if (!tasks.length) {
     return (
@@ -345,11 +407,11 @@ export function TaskTableContainer({
         <>
           <TaskTableControls
             searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            onSearchChange={handleSearchChange}
             selectedPriorities={selectedPriorities}
-            onPrioritiesChange={setSelectedPriorities}
+            onPrioritiesChange={handlePrioritiesChange}
             selectedStatuses={selectedStatuses}
-            onStatusesChange={setSelectedStatuses}
+            onStatusesChange={handleStatusesChange}
           />
           <TaskTablePresentation
             tasks={paginatedTasks}

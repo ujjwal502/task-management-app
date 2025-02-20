@@ -83,6 +83,38 @@ The [Kanban implementation](docs/KANBAN_FLOW_README.md) offers:
 - Event-driven architecture for user interactions
 - Optimized rendering with React.memo and useMemo
 
+## Testing
+
+### Test Setup
+
+The project includes a comprehensive test setup with Jest and React Testing Library:
+
+- **Test Environment**: JSDOM
+- **Setup File**: `jest.setup.ts` includes mocks for:
+  - IntersectionObserver
+  - ResizeObserver
+  - Next.js navigation
+  - Mantine notifications
+  - localStorage
+  - window.matchMedia
+
+### Test Utilities
+
+Custom test utilities (`test-utils.tsx`) provide:
+
+- Wrapped render function with Mantine providers
+- Custom selectors and user interactions
+- Mantine component configurations for testing
+
+### Example Tests
+
+Tests are written using React Testing Library with a focus on user interactions. For example, the CustomFieldsManager tests demonstrate:
+
+- Field name validation
+- Duplicate field prevention
+- Successful field addition
+- Integration with Mantine UI components
+
 ## 🛠 Technical Stack
 
 - **Framework**: Next.js 15.1.7
