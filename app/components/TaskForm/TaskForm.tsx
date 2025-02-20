@@ -96,8 +96,6 @@ export function TaskForm({
     });
   };
 
-  console.log("initialValues", initialValues);
-
   return (
     <Modal
       opened={opened}

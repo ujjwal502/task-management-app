@@ -14,7 +14,6 @@ export function Form({
   cancelLabel = "Cancel",
   title,
 }: FormProps) {
-  console.log("initialValues in the firm", initialValues);
   const [formData, setFormData] =
     useState<Record<string, string | boolean>>(initialValues);
 
@@ -42,7 +41,6 @@ export function Form({
           />
         );
       case "checkbox":
-        console.log("checkbox field", field);
         return (
           <div key={field.name} className={styles.formField}>
             <label className={styles.checkboxLabel}>

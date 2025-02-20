@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Task } from "@/app/shared/types/task";
 import { Box, Button, Group, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -18,35 +18,23 @@ import { TaskTablePagination } from "./TaskTablePagination";
 import { ConfirmationModal } from "../Common/ConfirmationModal/ConfirmationModal";
 import { TaskTableContainerProps } from "./TaskTable.types";
 import { PRIORITY_ORDER, STATUS_ORDER } from "./TaskTable.utils";
+import { useHistory } from "@/app/shared/hooks/useHistory";
+import { TaskTableHistory } from "./TaskTableHistory";
+import { useHotkeys } from "@mantine/hooks";
 
 export function TaskTableContainer({
   tasks: initialTasks,
 }: TaskTableContainerProps) {
+  const { tasks, setTasks, addToHistory, undo, redo, canUndo, canRedo } =
+    useHistory(initialTasks);
+
   const [customFields, setCustomFields] = useState<CustomField[]>(() => {
     const savedFields = localStorage.getItem("customFields");
     return savedFields ? JSON.parse(savedFields) : [];
   });
 
-  const [tasks, setTasks] = useState(() => {
-    const savedTasks = tasksStorage.getTasks();
-    console.log("Loading saved tasks:", savedTasks);
-    return savedTasks.length > 0 ? savedTasks : initialTasks;
-  });
-
-  useEffect(() => {
-    console.log("Saving tasks in effect:", tasks);
-    tasksStorage.setTasks(tasks);
-  }, [tasks]);
-
-  useEffect(() => {
-    localStorage.setItem("customFields", JSON.stringify(customFields));
-  }, [customFields]);
-
   const [opened, { open, close }] = useDisclosure(false);
-  const [
-    deleteModalOpened,
-    { open: openDeleteModal, close: closeDeleteModal },
-  ] = useDisclosure(false);
+  const [deleteModalOpened, { close: closeDeleteModal }] = useDisclosure(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [sortColumn, setSortColumn] = useState<string | undefined>();
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">();
@@ -61,6 +49,11 @@ export function TaskTableContainer({
     customFieldsModalOpened,
     { open: openCustomFieldsModal, close: closeCustomFieldsModal },
   ] = useDisclosure(false);
+
+  useHotkeys([
+    ["mod+z", () => canUndo && undo()],
+    ["mod+y", () => canRedo && redo()],
+  ]);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
@@ -148,16 +141,18 @@ export function TaskTableContainer({
   };
 
   const handleCreateTask = (newTask: Omit<Task, "id">) => {
-    const task: Task = {
+    const taskWithId: Task = {
       ...newTask,
       id: Math.max(...tasks.map((t) => t.id), 0) + 1,
     };
-    setTasks([...tasks, task]);
+    addToHistory({
+      type: "CREATE",
+      data: taskWithId,
+    });
     close();
-
     notifications.show({
       title: "Task Created",
-      message: `Task "${task.title}" has been created successfully`,
+      message: `Task "${taskWithId.title}" has been created successfully`,
       color: "green",
       icon: <IconCheck size={16} />,
     });
@@ -173,38 +168,49 @@ export function TaskTableContainer({
 
   const handleUpdateTask = (updatedTask: Omit<Task, "id">) => {
     if (!editingTask) return;
-
-    setTasks(
-      tasks.map((task) =>
-        task.id === editingTask.id ? { ...updatedTask, id: task.id } : task
-      )
-    );
+    const taskWithId: Task = { ...updatedTask, id: editingTask.id };
+    addToHistory({
+      type: "UPDATE",
+      data: taskWithId,
+      previousData: editingTask,
+    });
     setEditingTask(null);
     close();
-
     notifications.show({
       title: "Task Updated",
-      message: `Task "${updatedTask.title}" has been updated successfully`,
+      message: `Task "${taskWithId.title}" has been updated successfully`,
       color: "blue",
       icon: <IconCheck size={16} />,
     });
   };
 
-  const handleDeleteClick = (taskId: number) => {
-    setDeletingTaskId(taskId);
-    openDeleteModal();
+  const handleDeleteTask = (taskId: number) => {
+    const taskToDelete = tasks.find((t) => t.id === taskId);
+    if (!taskToDelete) return;
+    addToHistory({
+      type: "DELETE",
+      data: { id: taskId },
+      previousData: taskToDelete,
+    });
   };
 
   const handleConfirmDelete = () => {
     if (deletingTaskId) {
       const taskToDelete = tasks.find((task) => task.id === deletingTaskId);
-      setTasks(tasks.filter((task) => task.id !== deletingTaskId));
+      if (!taskToDelete) return;
+
+      addToHistory({
+        type: "DELETE",
+        data: { id: deletingTaskId },
+        previousData: taskToDelete,
+      });
+
       setDeletingTaskId(null);
       closeDeleteModal();
 
       notifications.show({
         title: "Task Deleted",
-        message: `Task "${taskToDelete?.title}" has been deleted`,
+        message: `Task "${taskToDelete.title}" has been deleted`,
         color: "red",
         icon: <IconX size={16} />,
       });
@@ -250,7 +256,6 @@ export function TaskTableContainer({
       };
     });
 
-    console.log("Saving tasks with new custom field:", updatedTasks);
     setTasks(updatedTasks);
     tasksStorage.setTasks(updatedTasks);
 
@@ -311,12 +316,18 @@ export function TaskTableContainer({
           selectedStatuses={selectedStatuses}
           onStatusesChange={setSelectedStatuses}
         />
+        <TaskTableHistory
+          onUndo={undo}
+          onRedo={redo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+        />
       </Group>
 
       <TaskTablePresentation
         tasks={paginatedTasks}
         onEdit={handleEditTask}
-        onDelete={handleDeleteClick}
+        onDelete={handleDeleteTask}
         sortColumn={sortColumn}
         sortDirection={sortDirection}
         onSort={handleSort}

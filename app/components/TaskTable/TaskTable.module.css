@@ -139,3 +139,17 @@
   color: var(--mantine-color-gray-6);
   font-size: var(--mantine-font-size-sm);
 }
+
+.historyButton {
+  color: var(--mantine-color-gray-7);
+  transition: color 0.2s;
+}
+
+.historyButton:not(:disabled):hover {
+  color: var(--mantine-color-blue-6);
+}
+
+.historyButton:disabled {
+  color: var(--mantine-color-gray-4);
+  cursor: not-allowed;
+}
