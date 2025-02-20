@@ -1,3 +1,9 @@
 export interface FilterState {
-  [key: string]: string | number | boolean | null | undefined;
+  searchQuery?: string;
+  selectedPriorities?: string[];
+  selectedStatuses?: string[];
+  sortColumn?: string;
+  sortDirection?: "asc" | "desc";
+  currentPage?: number;
+  pageSize?: number;
 }
