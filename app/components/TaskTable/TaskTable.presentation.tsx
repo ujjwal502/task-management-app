@@ -114,6 +114,8 @@ export function TaskTablePresentation({
       sortColumn={sortColumn}
       sortDirection={sortDirection as SortDirection}
       onSort={onSort}
+      aria-label="Task list table"
+      aria-rowcount={tasks.length}
     />
   );
 }

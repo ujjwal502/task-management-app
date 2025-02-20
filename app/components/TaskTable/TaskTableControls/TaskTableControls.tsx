@@ -43,7 +43,11 @@ export function TaskTableControls({
   );
 
   return (
-    <Group className={styles.controls}>
+    <Group
+      className={styles.controls}
+      role="search"
+      aria-label="Task filter controls"
+    >
       <TextInput
         className={styles.searchInput}
         placeholder="Search tasks..."

@@ -15,6 +15,7 @@ export interface DeleteAction {
   type: "DELETE";
   data: Pick<Task, "id">;
   previousData: Task;
+  index?: number;
 }
 
 export type HistoryAction = CreateAction | UpdateAction | DeleteAction;

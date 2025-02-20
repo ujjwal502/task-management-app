@@ -123,6 +123,8 @@ export function KanbanBoardPresentation({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => onDrop(e, priority)}
+                role="list"
+                aria-label={`${priority} priority tasks`}
               >
                 {getFilteredAndSortedTasks(priority).map((task, index) => (
                   <div
@@ -142,6 +144,8 @@ export function KanbanBoardPresentation({
                       e.currentTarget.style.transform = "";
                       onDrop(e, priority, index);
                     }}
+                    role="listitem"
+                    aria-label={`Task: ${task.title}, Status: ${task.status}`}
                   >
                     <Group justify="space-between" align="start">
                       <div>

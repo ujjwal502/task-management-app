@@ -11,6 +11,11 @@ A modern, feature-rich task management application built with Next.js that helps
   - Create, read, update, and delete tasks
   - Rich task properties including title, priority, and status
   - Inline editing and modal-based task management
+  - "Start Fresh" functionality to reset to initial tasks
+    - Clears all local storage data
+    - Resets to predefined mock tasks
+    - Useful for testing or starting over
+    - Accessible via the "Start Fresh" button in the header
 
 - **Advanced Filtering & Sorting**
 

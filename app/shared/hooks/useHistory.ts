@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { HistoryAction, HistoryState } from "../types/history";
+import { HistoryAction, HistoryState, DeleteAction } from "../types/history";
 import { Task } from "../types/task";
 import { tasksStorage } from "../utils/tasks-storage";
 import { notifications } from "@mantine/notifications";
@@ -15,64 +15,72 @@ export function useHistory(initialTasks: Task[]) {
     future: [],
   });
 
-  const addToHistory = useCallback((action: HistoryAction) => {
-    // First, record the action in history
-    // We clear the future array because any new action invalidates the redo stack
-    // Think of it like creating a new timeline branch
-    setHistory((curr) => ({
-      past: [...curr.past.slice(-MAX_HISTORY_LENGTH), action],
-      future: [],
-    }));
+  const addToHistory = useCallback(
+    (action: HistoryAction) => {
+      // First, record the action in history
+      // For DELETE actions, also store the task's index
+      if (action.type === "DELETE") {
+        const taskIndex = tasks.findIndex((task) => task.id === action.data.id);
+        action = {
+          ...action,
+          index: taskIndex, // Store the index where the task was deleted from
+        };
+      }
 
-    // Then apply the action to our task list
-    // We keep this separate from history management to maintain clean separation of concerns
-    switch (action.type) {
-      case "CREATE":
-        setTasks((prev) => [action.data, ...prev]);
-        break;
-      case "UPDATE":
-        setTasks((prev) =>
-          prev.map((task) => (task.id === action.data.id ? action.data : task))
-        );
-        break;
-      case "DELETE":
-        setTasks((prev) => prev.filter((task) => task.id !== action.data.id));
-        break;
-    }
-  }, []);
+      setHistory((curr) => ({
+        past: [...curr.past.slice(-MAX_HISTORY_LENGTH), action],
+        future: [],
+      }));
+
+      // Then apply the action to our task list
+      switch (action.type) {
+        case "CREATE":
+          setTasks((prev) => [action.data, ...prev]);
+          break;
+        case "UPDATE":
+          setTasks((prev) =>
+            prev.map((task) =>
+              task.id === action.data.id ? action.data : task
+            )
+          );
+          break;
+        case "DELETE":
+          setTasks((prev) => prev.filter((task) => task.id !== action.data.id));
+          break;
+      }
+    },
+    [tasks]
+  ); // Add tasks as dependency since we use it in the callback
 
   const undo = useCallback(() => {
     const currentHistory = history;
     if (currentHistory.past.length === 0) return;
 
-    // Get the most recent action from history
     const previous = currentHistory.past[currentHistory.past.length - 1];
-    // Remove it from past actions
     const newPast = currentHistory.past.slice(0, -1);
 
-    // Reverse the effects of the action
-    // Note: For updates, we restore the previous data
-    // For creates, we remove the created task
-    // For deletes, we restore the deleted task
     switch (previous.type) {
       case "CREATE":
         setTasks((tasks) => tasks.filter((t) => t.id !== previous.data.id));
         break;
       case "UPDATE":
         if (!previous.previousData) break;
-        const prevData = previous.previousData; // Store in a const to maintain type
+        const prevData = previous.previousData;
         setTasks((tasks) =>
           tasks.map((t) => (t.id === prevData.id ? prevData : t))
         );
         break;
       case "DELETE":
         if (!previous.previousData) break;
-        const deletedTask = previous.previousData; // Store in a const to maintain type
-        setTasks((tasks) => [...tasks, deletedTask]);
+        const deletedTask = previous.previousData;
+        setTasks((tasks) => {
+          // Insert the task at its original index, or append if index is not available
+          const index = (previous as DeleteAction).index ?? tasks.length;
+          return [...tasks.slice(0, index), deletedTask, ...tasks.slice(index)];
+        });
         break;
     }
 
-    // Move the action to the future array so we can redo if needed
     setHistory({
       past: newPast,
       future: [...currentHistory.future, previous],
