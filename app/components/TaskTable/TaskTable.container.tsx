@@ -193,13 +193,8 @@ export function TaskTableContainer({
   };
 
   const handleDeleteTask = (taskId: number) => {
-    const taskToDelete = tasks.find((t) => t.id === taskId);
-    if (!taskToDelete) return;
-    addToHistory({
-      type: "DELETE",
-      data: { id: taskId },
-      previousData: taskToDelete,
-    });
+    setDeletingTaskId(taskId);
+    openDeleteModal();
   };
 
   const handleConfirmDelete = () => {
@@ -266,8 +261,9 @@ export function TaskTableContainer({
 
     setTasks(updatedTasks);
     tasksStorage.setTasks(updatedTasks);
-
     setCustomFields((prev) => [...prev, newField]);
+
+    closeCustomFieldsModal();
 
     notifications.show({
       title: "Custom Field Added",
