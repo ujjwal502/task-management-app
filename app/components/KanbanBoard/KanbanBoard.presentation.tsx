@@ -37,6 +37,7 @@ interface KanbanBoardPresentationProps {
   onCreateTask: (priority: TaskPriority) => void;
   onDeleteTask: (taskId: number) => void;
   getFilteredAndSortedTasks: (priority: TaskPriority) => Task[];
+  onDragEnd: () => void;
 }
 
 export function KanbanBoardPresentation({
@@ -51,6 +52,7 @@ export function KanbanBoardPresentation({
   onCreateTask,
   onDeleteTask,
   getFilteredAndSortedTasks,
+  onDragEnd,
 }: KanbanBoardPresentationProps) {
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -122,7 +124,11 @@ export function KanbanBoardPresentation({
                 className={styles.columnContent}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                onDrop={(e) => onDrop(e, priority)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.backgroundColor = "";
+                  onDrop(e, priority);
+                }}
                 role="list"
                 aria-label={`${priority} priority tasks`}
               >
@@ -132,8 +138,10 @@ export function KanbanBoardPresentation({
                     className={styles.card}
                     draggable
                     onDragStart={(e) => onDragStart(e, task)}
+                    onDragEnd={onDragEnd}
                     onDragOver={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
                       e.currentTarget.style.transform = "translateY(2px)";
                     }}
                     onDragLeave={(e) => {
@@ -141,6 +149,7 @@ export function KanbanBoardPresentation({
                     }}
                     onDrop={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
                       e.currentTarget.style.transform = "";
                       onDrop(e, priority, index);
                     }}

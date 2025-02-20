@@ -174,21 +174,24 @@ export function TaskTableContainer({
     }
   };
 
-  const handleUpdateTask = (updatedTask: Omit<Task, "id">) => {
-    if (!editingTask) return;
-    const taskWithId: Task = { ...updatedTask, id: editingTask.id };
+  const handleUpdateTask = (taskData: Omit<Task, "id"> | Task) => {
+    const task =
+      "id" in taskData ? taskData : { ...taskData, id: editingTask!.id };
+    console.log("Updating task:", task);
+    const updatedTasks = tasks.map((t) => (t.id === task.id ? task : t));
+    setTasks(updatedTasks);
     addToHistory({
       type: "UPDATE",
-      data: taskWithId,
-      previousData: editingTask,
+      data: task,
+      previousData: tasks.find((t) => t.id === task.id)!,
     });
-    setEditingTask(null);
     close();
+
     notifications.show({
       title: "Task Updated",
-      message: `Task "${taskWithId.title}" has been updated successfully`,
-      color: "blue",
-      icon: <IconCheck size={16} />,
+      message: "Task has been successfully updated",
+      color: "green",
+      icon: <IconCheck />,
     });
   };
 

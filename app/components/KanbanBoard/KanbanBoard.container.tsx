@@ -8,14 +8,6 @@ import { KanbanBoardPresentation } from "./KanbanBoard.presentation";
 import { useDisclosure } from "@mantine/hooks";
 import { TaskForm } from "../TaskForm/TaskForm";
 
-const PRIORITY_COLUMNS: TaskPriority[] = [
-  TaskPriority.URGENT,
-  TaskPriority.HIGH,
-  TaskPriority.MEDIUM,
-  TaskPriority.LOW,
-  TaskPriority.NONE,
-];
-
 // These are the options users can select from when filtering tasks by status
 // I'm using human-readable labels for the UI while keeping enum values for the backend
 const STATUS_OPTIONS = [
@@ -32,50 +24,30 @@ export function KanbanBoardContainer({
   isLoading = false,
 }: KanbanBoardProps) {
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
-
-  // Each column needs its own configuration for sorting and filtering
-  // I'm using a Record to map each priority to its config, making it easy to look up
-  const [columnConfigs, setColumnConfigs] = useState<
-    Record<TaskPriority, ColumnConfig>
-  >(() => {
-    const configs: Record<TaskPriority, ColumnConfig> = {} as Record<
-      TaskPriority,
-      ColumnConfig
-    >;
-    PRIORITY_COLUMNS.forEach((priority) => {
-      configs[priority] = {
-        sortBy: undefined,
-        sortDirection: "asc",
-        filters: { status: [], search: "" },
-      };
-    });
-    return configs;
-  });
-
-  // I need to maintain the manual ordering of tasks within each column
-  // This is an array of task IDs for each priority column
-  // When users drag tasks around, I update this order
   const [columnOrder, setColumnOrder] = useState<
     Record<TaskPriority, number[]>
   >(() => {
-    const order: Record<TaskPriority, number[]> = {} as Record<
-      TaskPriority,
-      number[]
-    >;
-    PRIORITY_COLUMNS.forEach((priority) => {
-      order[priority] = tasks
-        .filter((task) => task.priority === priority)
-        .map((task) => task.id);
+    const order: Record<TaskPriority, number[]> = {
+      [TaskPriority.URGENT]: [],
+      [TaskPriority.HIGH]: [],
+      [TaskPriority.MEDIUM]: [],
+      [TaskPriority.LOW]: [],
+      [TaskPriority.NONE]: [],
+    };
+
+    // Initialize with current task IDs
+    tasks.forEach((task) => {
+      order[task.priority].push(task.id);
     });
+
     return order;
   });
 
-  // When tasks change (create/update/delete), I need to sync the column order
-  // This ensures we don't have stale task IDs and new tasks are added correctly
+  // When tasks change (create/update/delete), sync the column order
   useEffect(() => {
     setColumnOrder((prev) => {
       const newOrder = { ...prev };
-      PRIORITY_COLUMNS.forEach((priority) => {
+      Object.values(TaskPriority).forEach((priority) => {
         const existingIds = new Set(newOrder[priority]);
         const currentTasks = tasks
           .filter((task) => task.priority === priority)
@@ -94,46 +66,87 @@ export function KanbanBoardContainer({
     });
   }, [tasks]);
 
-  // When a user starts dragging, I store the task and set up the drag event
   const handleDragStart = (e: DragEvent<HTMLDivElement>, task: Task) => {
     setDraggedTask(task);
-    e.dataTransfer.setData("text/plain", task.id.toString());
+    e.dataTransfer.setData(
+      "application/json",
+      JSON.stringify({
+        id: task.id,
+        priority: task.priority,
+      })
+    );
+    e.dataTransfer.effectAllowed = "move";
   };
 
-  // This is where the magic of drag-and-drop happens
-  // I need to update both the task's priority and its position in the new column
   const handleDrop = (
     e: DragEvent<HTMLDivElement>,
     priority: TaskPriority,
     index?: number
   ) => {
     e.preventDefault();
-    e.currentTarget.style.backgroundColor = "";
+    e.stopPropagation();
 
-    if (!draggedTask) return;
+    console.log("Drop event:", { draggedTask, priority, index });
 
-    const updatedTask = { ...draggedTask, priority };
-    const sourceColumn = columnOrder[draggedTask.priority];
-    const targetColumn = columnOrder[priority];
-
-    const newSourceColumn = sourceColumn.filter((id) => id !== draggedTask.id);
-    const newTargetColumn = [...targetColumn];
-
-    if (typeof index === "number") {
-      newTargetColumn.splice(index, 0, draggedTask.id);
-    } else {
-      newTargetColumn.push(draggedTask.id);
+    if (!draggedTask) {
+      console.warn("No dragged task found");
+      return;
     }
 
-    setColumnOrder({
-      ...columnOrder,
-      [draggedTask.priority]: newSourceColumn,
-      [priority]: newTargetColumn,
+    // First update the task in parent component
+    const updatedTask = { ...draggedTask, priority };
+    onTaskUpdate(updatedTask);
+
+    // Then update the column order
+    setColumnOrder((prev) => {
+      const sourceColumn = [...prev[draggedTask.priority]];
+      const targetColumn = [...prev[priority]];
+
+      // Remove from source
+      const taskIndex = sourceColumn.indexOf(draggedTask.id);
+      if (taskIndex > -1) {
+        sourceColumn.splice(taskIndex, 1);
+      }
+
+      // Add to target
+      if (typeof index === "number") {
+        targetColumn.splice(index, 0, draggedTask.id);
+      } else {
+        targetColumn.push(draggedTask.id);
+      }
+
+      return {
+        ...prev,
+        [draggedTask.priority]: sourceColumn,
+        [priority]: targetColumn,
+      };
     });
 
-    onTaskUpdate(updatedTask);
     setDraggedTask(null);
   };
+
+  const handleDragEnd = () => {
+    setDraggedTask(null);
+  };
+
+  const [columnConfigs, setColumnConfigs] = useState<
+    Record<TaskPriority, ColumnConfig>
+  >(() => {
+    const configs: Record<TaskPriority, ColumnConfig> = {} as Record<
+      TaskPriority,
+      ColumnConfig
+    >;
+    Object.values(TaskPriority).forEach((priority) => {
+      configs[priority] = {
+        sortBy: undefined,
+        filters: {
+          status: [],
+          search: "",
+        },
+      };
+    });
+    return configs;
+  });
 
   // I'm implementing a toggle sort - clicking the same field twice reverses the direction
   const handleColumnSort = (priority: TaskPriority, field: string | null) => {
@@ -241,12 +254,13 @@ export function KanbanBoardContainer({
   return (
     <>
       <KanbanBoardPresentation
-        priorityColumns={PRIORITY_COLUMNS}
+        priorityColumns={Object.values(TaskPriority)}
         statusOptions={STATUS_OPTIONS}
         columnConfigs={columnConfigs}
         isLoading={isLoading}
         onDragStart={handleDragStart}
         onDrop={handleDrop}
+        onDragEnd={handleDragEnd}
         onColumnSort={handleColumnSort}
         onColumnFilter={handleColumnFilter}
         onCreateTask={handleCreateTask}
