@@ -28,7 +28,7 @@ export function useHistory(initialTasks: Task[]) {
     // We keep this separate from history management to maintain clean separation of concerns
     switch (action.type) {
       case "CREATE":
-        setTasks((prev) => [...prev, action.data]);
+        setTasks((prev) => [action.data, ...prev]);
         break;
       case "UPDATE":
         setTasks((prev) =>
@@ -98,7 +98,7 @@ export function useHistory(initialTasks: Task[]) {
     // This is similar to addToHistory but we're pulling from the future instead
     switch (next.type) {
       case "CREATE":
-        setTasks((tasks) => [...tasks, next.data]);
+        setTasks((tasks) => [next.data, ...tasks]);
         break;
       case "UPDATE":
         setTasks((tasks) =>

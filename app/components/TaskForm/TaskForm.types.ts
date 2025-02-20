@@ -1,7 +1,7 @@
 import { Task } from "@/app/shared/types/task";
-import { CustomField } from "@/app/shared/types/custom-field";
+import type { CustomField } from "@/app/shared/types/custom-field";
 
-export interface TaskFormProps {
+interface TaskFormProps {
   opened: boolean;
   onClose: () => void;
   onSubmit: (task: Omit<Task, "id">) => void;
@@ -9,3 +9,5 @@ export interface TaskFormProps {
   title: string;
   customFields?: CustomField[];
 }
+
+export type { TaskFormProps };

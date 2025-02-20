@@ -1,19 +1,11 @@
 import { Button, Group, Modal, Stack, Text, Alert } from "@mantine/core";
-import { CustomField } from "@/app/shared/types/custom-field";
 import { Form } from "../Common/Form/Form";
 import { Field } from "../Common/Form/Form.types";
 import { useMemo } from "react";
 import styles from "./CustomFieldsManager.module.css";
 import { IconTrash, IconAlertCircle } from "@tabler/icons-react";
-
-interface CustomFieldsManagerPresentationProps {
-  opened: boolean;
-  onClose: () => void;
-  customFields: CustomField[];
-  onSubmit: (values: Record<string, string | boolean>) => void;
-  onRemoveField: (fieldId: string) => void;
-  error: string | null;
-}
+import type { CustomFieldsManagerPresentationProps } from "./CustomFieldsManager.types";
+import { FieldType } from "@/app/shared/types/enums";
 
 export function CustomFieldsManagerPresentation({
   opened,
@@ -26,14 +18,14 @@ export function CustomFieldsManagerPresentation({
   const fields: Field[] = useMemo(
     () => [
       {
-        type: "text",
+        type: FieldType.TEXT,
         name: "name",
         label: "Field Name",
         placeholder: "Enter field name",
         required: true,
       },
       {
-        type: "select",
+        type: FieldType.SELECT,
         name: "type",
         label: "Field Type",
         required: true,

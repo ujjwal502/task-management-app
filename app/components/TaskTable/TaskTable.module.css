@@ -39,28 +39,33 @@
 }
 
 .priority-high {
-  background-color: var(--mantine-color-orange-0);
+  background-color: var(--mantine-color-orange-1);
   color: var(--mantine-color-orange-9);
+  font-weight: 600;
 }
 
 .priority-urgent {
-  background-color: var(--mantine-color-red-0);
+  background-color: var(--mantine-color-red-1);
   color: var(--mantine-color-red-9);
+  font-weight: 600;
 }
 
 .priority-medium {
-  background-color: var(--mantine-color-warning-0);
-  color: var(--mantine-color-warning-9);
+  background-color: var(--mantine-color-yellow-1);
+  color: var(--mantine-color-yellow-9);
+  font-weight: 600;
 }
 
 .priority-low {
-  background-color: var(--mantine-color-success-0);
-  color: var(--mantine-color-success-9);
+  background-color: var(--mantine-color-green-1);
+  color: var(--mantine-color-green-9);
+  font-weight: 600;
 }
 
 .priority-none {
-  background-color: var(--mantine-color-gray-0);
-  color: var(--mantine-color-gray-7);
+  background-color: var(--mantine-color-gray-1);
+  color: var(--mantine-color-gray-9);
+  font-weight: 500;
 }
 
 .status-not_started,
@@ -73,18 +78,21 @@
 }
 
 .status-not_started {
-  background-color: var(--mantine-color-gray-0);
-  color: var(--mantine-color-gray-7);
+  background-color: var(--mantine-color-gray-1);
+  color: var(--mantine-color-gray-9);
+  font-weight: 500;
 }
 
 .status-in_progress {
-  background-color: var(--mantine-color-warning-0);
-  color: var(--mantine-color-warning-9);
+  background-color: var(--mantine-color-blue-1);
+  color: var(--mantine-color-blue-9);
+  font-weight: 600;
 }
 
 .status-completed {
-  background-color: var(--mantine-color-success-0);
-  color: var(--mantine-color-success-9);
+  background-color: var(--mantine-color-green-1);
+  color: var(--mantine-color-green-9);
+  font-weight: 600;
 }
 
 .emptyState {

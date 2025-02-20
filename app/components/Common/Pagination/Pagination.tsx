@@ -3,13 +3,14 @@
 import { Button, Group } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import styles from "./Pagination.module.css";
-import { PaginationProps } from "./Pagination.types";
+import type { PaginationProps } from "./Pagination.types";
+import { Size } from "@/app/shared/types/enums";
 
 export function Pagination({
   currentPage,
   totalPages,
   onChange,
-  size = "sm",
+  size = Size.SM,
 }: PaginationProps) {
   const getPageNumbers = () => {
     const pages = [];
@@ -55,13 +56,18 @@ export function Pagination({
         disabled={currentPage === 1}
         onClick={() => onChange(currentPage - 1)}
         className={styles.pageButton}
+        aria-label="Previous page"
       >
         <IconChevronLeft size={16} />
       </Button>
 
       {getPageNumbers().map((pageNum, index) =>
         pageNum === -1 ? (
-          <span key={`ellipsis-${index}`} className={styles.ellipsis}>
+          <span
+            key={`ellipsis-${index}`}
+            className={styles.ellipsis}
+            aria-hidden="true"
+          >
             ...
           </span>
         ) : (
@@ -71,6 +77,8 @@ export function Pagination({
             size={size}
             onClick={() => onChange(pageNum)}
             className={styles.pageButton}
+            aria-label={`Go to page ${pageNum}`}
+            aria-current={currentPage === pageNum ? "page" : undefined}
           >
             {pageNum}
           </Button>
@@ -83,6 +91,7 @@ export function Pagination({
         disabled={currentPage === totalPages}
         onClick={() => onChange(currentPage + 1)}
         className={styles.pageButton}
+        aria-label="Next page"
       >
         <IconChevronRight size={16} />
       </Button>

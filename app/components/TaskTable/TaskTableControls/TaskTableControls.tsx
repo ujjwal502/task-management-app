@@ -3,7 +3,7 @@
 import { Group, MultiSelect, TextInput } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
 import { useMemo } from "react";
-import styles from "./TaskTable.module.css";
+import styles from "../TaskTable.module.css";
 
 interface TaskTableControlsProps {
   searchQuery: string;
@@ -50,6 +50,7 @@ export function TaskTableControls({
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
         leftSection={<IconSearch size={16} />}
+        aria-label="Search tasks"
       />
       <MultiSelect
         className={styles.filterSelect}
@@ -58,6 +59,7 @@ export function TaskTableControls({
         onChange={onPrioritiesChange}
         placeholder="Filter by priority"
         clearable
+        aria-label="Filter tasks by priority"
       />
       <MultiSelect
         className={styles.filterSelect}
@@ -66,6 +68,7 @@ export function TaskTableControls({
         onChange={onStatusesChange}
         placeholder="Filter by status"
         clearable
+        aria-label="Filter tasks by status"
       />
     </Group>
   );

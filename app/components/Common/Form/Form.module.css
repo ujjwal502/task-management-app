@@ -20,7 +20,7 @@
 .label {
   display: block;
   margin-bottom: var(--mantine-spacing-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--mantine-color-gray-9);
   font-size: var(--mantine-font-size-sm);
 }
@@ -88,7 +88,8 @@
 
 .radioText {
   font-size: var(--mantine-font-size-sm);
-  color: var(--mantine-color-gray-7);
+  color: var(--mantine-color-gray-9);
+  font-weight: 500;
 }
 
 .radioInput:checked ~ .radioText {
@@ -110,7 +111,7 @@
 }
 
 .required {
-  color: var(--mantine-color-red-6);
+  color: var(--mantine-color-red-7);
 }
 
 .checkboxLabel {
@@ -163,7 +164,8 @@
 
 .checkboxText {
   font-size: var(--mantine-font-size-sm);
-  color: var(--mantine-color-gray-7);
+  color: var(--mantine-color-gray-9);
+  font-weight: 500;
 }
 
 .checkboxLabel:hover .checkboxCustom {

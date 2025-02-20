@@ -3,7 +3,7 @@
 import { Button, Group, TextInput, Title } from "@mantine/core";
 import { FormEvent, useState } from "react";
 import styles from "./Form.module.css";
-import { Field, FormProps } from "./Form.types";
+import type { Field, FormProps } from "./Form.types";
 
 export function Form({
   fields,
@@ -38,12 +38,14 @@ export function Form({
               setFormData((prev) => ({ ...prev, [field.name]: e.target.value }))
             }
             className={styles.input}
+            aria-label={field.label}
+            id={field.name}
           />
         );
       case "checkbox":
         return (
           <div key={field.name} className={styles.formField}>
-            <label className={styles.checkboxLabel}>
+            <label className={styles.checkboxLabel} htmlFor={field.name}>
               <div className={styles.checkboxWrapper}>
                 <input
                   type="checkbox"
@@ -55,8 +57,10 @@ export function Form({
                     }))
                   }
                   className={styles.checkboxInput}
+                  id={field.name}
+                  aria-label={field.label}
                 />
-                <span className={styles.checkboxCustom} />
+                <span className={styles.checkboxCustom} aria-hidden="true" />
               </div>
               <span className={styles.checkboxText}>{field.label}</span>
             </label>
@@ -82,6 +86,8 @@ export function Form({
                     }
                     className={styles.radioInput}
                     required={field.required}
+                    id={`${field.name}-${option.value}`}
+                    aria-label={option.label}
                   />
                   <span className={styles.radioButton} />
                   <span className={styles.radioText}>{option.label}</span>
@@ -108,6 +114,8 @@ export function Form({
               }
               className={styles.select}
               required={field.required}
+              id={field.name}
+              aria-label={field.label}
             >
               <option value="">{field.placeholder || "Select..."}</option>
               {field.options.map((option) => (

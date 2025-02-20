@@ -1,16 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CustomField, CustomFieldType } from "@/app/shared/types/custom-field";
+import { CustomFieldType } from "@/app/shared/types/enums";
 import { CustomFieldsManagerPresentation } from "./CustomFieldsManager.presentation";
-
-interface CustomFieldsManagerProps {
-  opened: boolean;
-  onClose: () => void;
-  customFields: CustomField[];
-  onAddField: (field: Omit<CustomField, "id">) => void;
-  onRemoveField: (fieldId: string) => void;
-}
+import type { CustomFieldsManagerProps } from "./CustomFieldsManager.types";
 
 export function CustomFieldsManager(props: CustomFieldsManagerProps) {
   const [error, setError] = useState<string | null>(null);

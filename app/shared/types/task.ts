@@ -1,5 +1,4 @@
-export type TaskPriority = "low" | "medium" | "urgent" | "none" | "high";
-export type TaskStatus = "not_started" | "in_progress" | "completed";
+import { TaskPriority, TaskStatus } from "./enums";
 
 export interface Task {
   id: number;

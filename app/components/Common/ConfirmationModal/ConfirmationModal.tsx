@@ -2,7 +2,7 @@
 
 import { Button, Group, Modal, Text } from "@mantine/core";
 import styles from "./ConfirmationModal.module.css";
-import { ConfirmationModalProps } from "./ConfirmationModal.types";
+import type { ConfirmationModalProps } from "./ConfirmationModal.types";
 
 export function ConfirmationModal({
   opened,

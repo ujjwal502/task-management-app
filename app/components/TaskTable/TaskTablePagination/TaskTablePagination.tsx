@@ -1,7 +1,8 @@
 "use client";
 
 import { Group, Select, Text } from "@mantine/core";
-import { Pagination } from "../Common/Pagination/Pagination";
+import { Pagination } from "../../Common/Pagination/Pagination";
+import { Size } from "@/app/shared/types/enums";
 
 interface TaskTablePaginationProps {
   currentPage: number;
@@ -50,7 +51,7 @@ export function TaskTablePagination({
           currentPage={currentPage}
           totalPages={totalPages}
           onChange={onPageChange}
-          size="sm"
+          size={Size.SM}
         />
       </Group>
     </Group>

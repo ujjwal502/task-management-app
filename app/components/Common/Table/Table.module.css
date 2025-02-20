@@ -19,7 +19,7 @@
 .headerCell {
   padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
   font-weight: 600;
-  color: var(--mantine-color-gray-7);
+  color: var(--mantine-color-gray-9);
   white-space: nowrap;
 }
 
@@ -57,13 +57,13 @@
 }
 
 .sortable:hover {
-  background-color: var(--mantine-color-gray-1);
+  background-color: var(--mantine-color-gray-2);
 }
 
 .sortIconWrapper {
   display: flex;
   align-items: center;
-  color: var(--mantine-color-gray-5);
+  color: var(--mantine-color-gray-7);
 }
 
 .sortIcon {

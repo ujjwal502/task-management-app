@@ -1,11 +1,11 @@
 "use client";
 
-import { TaskPriority, TaskStatus } from "@/app/shared/types/task";
 import { Modal } from "@mantine/core";
 import { Form } from "../Common/Form/Form";
 import { Field } from "../Common/Form/Form.types";
 import { useMemo } from "react";
-import { TaskFormProps } from "./TaskForm.types";
+import type { TaskFormProps } from "./TaskForm.types";
+import { FieldType, TaskPriority, TaskStatus } from "@/app/shared/types/enums";
 
 export function TaskForm({
   opened,
@@ -18,14 +18,14 @@ export function TaskForm({
   const fields: Field[] = useMemo(
     () => [
       {
-        type: "text",
+        type: FieldType.TEXT,
         name: "title",
         label: "Title",
         placeholder: "Enter task title",
         required: true,
       },
       {
-        type: "radio",
+        type: FieldType.RADIO,
         name: "priority",
         label: "Priority",
         required: true,
@@ -38,7 +38,7 @@ export function TaskForm({
         ],
       },
       {
-        type: "radio",
+        type: FieldType.RADIO,
         name: "status",
         label: "Status",
         required: true,
@@ -52,20 +52,20 @@ export function TaskForm({
         switch (field.type) {
           case "checkbox":
             return {
-              type: "checkbox",
+              type: FieldType.CHECKBOX,
               name: field.name,
               label: field.name,
             };
           case "number":
             return {
-              type: "number",
+              type: FieldType.NUMBER,
               name: field.name,
               label: field.name,
               placeholder: `Enter ${field.name.toLowerCase()}`,
             };
           default:
             return {
-              type: "text",
+              type: FieldType.TEXT,
               name: field.name,
               label: field.name,
               placeholder: `Enter ${field.name.toLowerCase()}`,

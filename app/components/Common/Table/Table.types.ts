@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
+import { SortDirection } from "@/app/shared/types/enums";
 
-export interface Column<T> {
+interface Column<T> {
   key: string;
   header: ReactNode;
   render: (item: T) => ReactNode;
@@ -8,12 +9,14 @@ export interface Column<T> {
   sortable?: boolean;
 }
 
-export interface TableProps<T> {
+interface TableProps<T> {
   data: T[];
   columns: Column<T>[];
   onRowClick?: (item: T) => void;
   className?: string;
   sortColumn?: string;
-  sortDirection?: "asc" | "desc";
+  sortDirection?: SortDirection;
   onSort?: (column: string) => void;
 }
+
+export type { Column, TableProps };

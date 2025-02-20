@@ -1,6 +1,6 @@
 "use client";
 
-import { Container, Title, Box, Skeleton } from "@mantine/core";
+import { Title, Box, Skeleton } from "@mantine/core";
 import { TaskTable } from "@/app/components/TaskTable";
 import { useEffect, useState } from "react";
 import { tasksStorage } from "@/app/shared/utils/tasks-storage";
@@ -23,7 +23,7 @@ export function TaskManagerContainer({
   }, [initialTasks]);
 
   return (
-    <Container size="xl" py="xl">
+    <Box size="xl" p="xl">
       <Box ta="center" mb="lg">
         <Title order={1}>Task Management</Title>
       </Box>
@@ -35,6 +35,6 @@ export function TaskManagerContainer({
       ) : (
         <TaskTable tasks={tasks} />
       )}
-    </Container>
+    </Box>
   );
 }

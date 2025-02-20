@@ -3,11 +3,12 @@
 import { useMemo } from "react";
 import { ActionIcon, Group, Tooltip } from "@mantine/core";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
-import { Task } from "@/app/shared/types/task";
-import { CustomField } from "@/app/shared/types/custom-field";
+import type { Task } from "@/app/shared/types/task";
+import type { CustomField } from "@/app/shared/types/custom-field";
 
 import { Table } from "../Common/Table/Table";
 import styles from "./TaskTable.module.css";
+import { SortDirection } from "@/app/shared/types/enums";
 
 interface TaskTablePresentationProps {
   tasks: Task[];
@@ -81,7 +82,7 @@ export function TaskTablePresentation({
                   e.stopPropagation();
                   onEdit(task.id);
                 }}
-                aria-label="Edit task"
+                aria-label={`Edit task: ${task.title}`}
               >
                 <IconEdit size={16} />
               </ActionIcon>
@@ -94,7 +95,7 @@ export function TaskTablePresentation({
                   e.stopPropagation();
                   onDelete(task.id);
                 }}
-                aria-label="Delete task"
+                aria-label={`Delete task: ${task.title}`}
               >
                 <IconTrash size={16} />
               </ActionIcon>
@@ -111,7 +112,7 @@ export function TaskTablePresentation({
       data={tasks}
       columns={columns}
       sortColumn={sortColumn}
-      sortDirection={sortDirection}
+      sortDirection={sortDirection as SortDirection}
       onSort={onSort}
     />
   );

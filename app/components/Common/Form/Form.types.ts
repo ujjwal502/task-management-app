@@ -1,45 +1,40 @@
-export type FieldType = "text" | "radio" | "checkbox" | "number" | "select";
+import { FieldType } from "@/app/shared/types/enums";
 
-export interface BaseField {
+interface BaseField {
   type: FieldType;
   name: string;
   label: string;
   required?: boolean;
 }
 
-export interface TextField extends BaseField {
-  type: "text";
+interface TextField extends BaseField {
+  type: FieldType.TEXT;
   placeholder?: string;
 }
 
-export interface RadioField extends BaseField {
-  type: "radio";
+interface RadioField extends BaseField {
+  type: FieldType.RADIO;
   options: { value: string; label: string }[];
 }
 
-export interface CheckboxField extends BaseField {
-  type: "checkbox";
+interface CheckboxField extends BaseField {
+  type: FieldType.CHECKBOX;
 }
 
-export interface NumberField extends BaseField {
-  type: "number";
+interface NumberField extends BaseField {
+  type: FieldType.NUMBER;
   placeholder?: string;
 }
 
-export interface SelectField extends BaseField {
-  type: "select";
+interface SelectField extends BaseField {
+  type: FieldType.SELECT;
   options: { value: string; label: string }[];
   placeholder?: string;
 }
 
-export type Field =
-  | TextField
-  | RadioField
-  | CheckboxField
-  | NumberField
-  | SelectField;
+type Field = TextField | RadioField | CheckboxField | NumberField | SelectField;
 
-export interface FormProps {
+interface FormProps {
   fields: Field[];
   onSubmit: (values: Record<string, string | boolean>) => void;
   initialValues?: Record<string, string | boolean>;
@@ -48,3 +43,5 @@ export interface FormProps {
   cancelLabel?: string;
   title?: string;
 }
+
+export type { FieldType, BaseField, Field, FormProps };

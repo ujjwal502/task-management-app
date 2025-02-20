@@ -1,8 +1,12 @@
 "use client";
 
-import { IconChevronDown, IconChevronUp, IconSelector } from "@tabler/icons-react";
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconSelector,
+} from "@tabler/icons-react";
 import styles from "./Table.module.css";
-import { TableProps } from "./Table.types";
+import type { TableProps } from "./Table.types";
 
 export function Table<T>({
   data,

@@ -1,4 +1,4 @@
-export interface ConfirmationModalProps {
+interface ConfirmationModalProps {
   opened: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -7,3 +7,5 @@ export interface ConfirmationModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
 }
+
+export type { ConfirmationModalProps };

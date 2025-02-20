@@ -23,6 +23,7 @@ export function TaskTableHistory({
           disabled={!canUndo}
           onClick={onUndo}
           leftSection={<IconArrowBackUp size={16} />}
+          aria-label="Undo last action"
         >
           Undo
         </Button>
@@ -34,6 +35,7 @@ export function TaskTableHistory({
           disabled={!canRedo}
           onClick={onRedo}
           leftSection={<IconArrowForwardUp size={16} />}
+          aria-label="Redo last undone action"
         >
           Redo
         </Button>

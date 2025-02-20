@@ -1,26 +1,29 @@
 "use client";
 import { useState, useMemo } from "react";
 import { Task } from "@/app/shared/types/task";
-import { Box, Button, Group, Text } from "@mantine/core";
+import { Box, Button, Group, Text, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
 
 import { tasksStorage } from "@/app/shared/utils/tasks-storage";
-import { CustomField } from "@/app/shared/types/custom-field";
+import type { CustomField } from "@/app/shared/types/custom-field";
 
 import { TaskTablePresentation } from "./TaskTable.presentation";
 import { CustomFieldsManager } from "../CustomFields";
 import styles from "./TaskTable.module.css";
 import { TaskForm } from "../TaskForm/TaskForm";
-import { TaskTableControls } from "./TaskTableControls";
-import { TaskTablePagination } from "./TaskTablePagination";
+import { TaskTableControls } from "./TaskTableControls/TaskTableControls";
+import { TaskTablePagination } from "./TaskTablePagination/TaskTablePagination";
 import { ConfirmationModal } from "../Common/ConfirmationModal/ConfirmationModal";
 import { TaskTableContainerProps } from "./TaskTable.types";
 import { PRIORITY_ORDER, STATUS_ORDER } from "./TaskTable.utils";
 import { useHistory } from "@/app/shared/hooks/useHistory";
-import { TaskTableHistory } from "./TaskTableHistory";
+import { TaskTableHistory } from "./TaskTableHistory/TaskTableHistory";
 import { useHotkeys } from "@mantine/hooks";
+import { ViewToggle } from "../ViewToggle/ViewToggle";
+import { ViewMode } from "@/app/shared/types/enums";
+import { KanbanBoard } from "../KanbanBoard";
 
 export function TaskTableContainer({
   tasks: initialTasks,
@@ -34,7 +37,10 @@ export function TaskTableContainer({
   });
 
   const [opened, { open, close }] = useDisclosure(false);
-  const [deleteModalOpened, { close: closeDeleteModal }] = useDisclosure(false);
+  const [
+    deleteModalOpened,
+    { open: openDeleteModal, close: closeDeleteModal },
+  ] = useDisclosure(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [sortColumn, setSortColumn] = useState<string | undefined>();
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">();
@@ -49,6 +55,8 @@ export function TaskTableContainer({
     customFieldsModalOpened,
     { open: openCustomFieldsModal, close: closeCustomFieldsModal },
   ] = useDisclosure(false);
+
+  const [view, setView] = useState<"table" | "kanban">("table");
 
   useHotkeys([
     ["mod+z", () => canUndo && undo()],
@@ -302,45 +310,75 @@ export function TaskTableContainer({
   }
 
   return (
-    <>
-      <Group mb="md" justify="space-between">
-        <Button onClick={open}>Create Task</Button>
-        <Button variant="light" onClick={openCustomFieldsModal}>
-          Manage Custom Fields
-        </Button>
-        <TaskTableControls
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedPriorities={selectedPriorities}
-          onPrioritiesChange={setSelectedPriorities}
-          selectedStatuses={selectedStatuses}
-          onStatusesChange={setSelectedStatuses}
-        />
-        <TaskTableHistory
-          onUndo={undo}
-          onRedo={redo}
-          canUndo={canUndo}
-          canRedo={canRedo}
+    <Stack gap="md">
+      <Group justify="space-between">
+        <Group>
+          <Button onClick={open} aria-label="Create new task">
+            Create Task
+          </Button>
+          <Button
+            variant="outline"
+            onClick={openCustomFieldsModal}
+            aria-label="Open custom fields manager"
+          >
+            Manage Custom Fields
+          </Button>
+        </Group>
+        <ViewToggle
+          view={view as ViewMode}
+          onChange={setView}
+          aria-label="Toggle view mode"
         />
       </Group>
 
-      <TaskTablePresentation
-        tasks={paginatedTasks}
-        onEdit={handleEditTask}
-        onDelete={handleDeleteTask}
-        sortColumn={sortColumn}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-        customFields={customFields}
+      <TaskTableHistory
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={undo}
+        onRedo={redo}
       />
 
-      <TaskTablePagination
-        currentPage={currentPage}
-        pageSize={pageSize}
-        totalItems={filteredTasks.length}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-      />
+      {view === "table" ? (
+        <>
+          <TaskTableControls
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedPriorities={selectedPriorities}
+            onPrioritiesChange={setSelectedPriorities}
+            selectedStatuses={selectedStatuses}
+            onStatusesChange={setSelectedStatuses}
+          />
+          <TaskTablePresentation
+            tasks={paginatedTasks}
+            onEdit={handleEditTask}
+            onDelete={handleDeleteTask}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+            customFields={customFields}
+          />
+          <TaskTablePagination
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalItems={filteredTasks.length}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        </>
+      ) : (
+        <Box w="100%" mih={600}>
+          <KanbanBoard
+            tasks={filteredTasks}
+            onTaskCreate={handleCreateTask}
+            onTaskUpdate={handleUpdateTask}
+            onTaskDelete={(taskId) => {
+              setDeletingTaskId(taskId);
+              openDeleteModal();
+            }}
+            isLoading={false}
+          />
+        </Box>
+      )}
 
       <TaskForm
         opened={opened}
@@ -372,6 +410,6 @@ export function TaskTableContainer({
         onAddField={handleAddCustomField}
         onRemoveField={handleRemoveCustomField}
       />
-    </>
+    </Stack>
   );
 }
