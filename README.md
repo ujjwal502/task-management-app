@@ -2,6 +2,12 @@
 
 A modern, feature-rich task management application built with Next.js that helps users organize and track their tasks efficiently. The application supports both table and Kanban views, with powerful features like undo/redo, custom fields, and real-time filtering.
 
+## Documentation
+
+- [Kanban Board Implementation Guide](docs/KANBAN_FLOW_README.md)
+- [Undo/Redo System Documentation](docs/UNDO_REDO_FLOW_README.md)
+- [Custom Fields Management Guide](docs/CUSTOM_FIELD_MANAGEMENT_README.md)
+
 ## Features
 
 ### Core Features
@@ -126,8 +132,21 @@ Tests are written using React Testing Library with a focus on user interactions.
 
 ## Getting Started
 
-1. Clone the repository
-2. Install dependencies:
+### Node Version
+
+This project uses Node.js version 21.6.2. To ensure you're using the correct version:
+
+1. Make sure you have [NVM (Node Version Manager)](https://github.com/nvm-sh/nvm) installed
+2. Run the following command in the project root:
+
+   ```bash
+   nvm use
+   ```
+
+   This will automatically switch to Node.js 21.6.2 as specified in the `.nvmrc` file.
+
+3. Clone the repository
+4. Install dependencies:
 
 ```bash
 npm install
@@ -170,9 +189,6 @@ pnpm dev
 
 ## 📖 References & Documentation
 
-- [Kanban Board Implementation Guide](docs/KANBAN_FLOW_README.md)
-- [Undo/Redo System Documentation](docs/UNDO_REDO_FLOW_README.md)
-- [Custom Fields Management Guide](docs/CUSTOM_FIELD_MANAGEMENT_README.md)
 - [Mantine UI](https://mantine.dev/)
 - [Next.js](https://nextjs.org/)
 - [React](https://react.dev/)

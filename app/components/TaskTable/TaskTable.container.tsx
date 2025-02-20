@@ -24,8 +24,8 @@ import { useHotkeys } from "@mantine/hooks";
 import { ViewToggle } from "../ViewToggle/ViewToggle";
 import { ViewMode } from "@/app/shared/types/enums";
 import { KanbanBoard } from "../KanbanBoard";
-import { filterStorage } from "@/app/shared/utils/filter-storage";
 import { customFieldsStorage } from "@/app/shared/utils/custom-fields-storage";
+import { filterStorage } from "@/app/shared/utils/filter-storage";
 
 export function TaskTableContainer({
   tasks: initialTasks,
