@@ -1,6 +1,6 @@
 "use client";
 
-import { Title, Box, Skeleton, Group } from "@mantine/core";
+import { Title, Box, Skeleton, Group, Text } from "@mantine/core";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { tasksStorage } from "@/app/shared/utils/tasks-storage";
@@ -47,14 +47,22 @@ export function TaskManagerContainer({
   }, [initialTasks]);
 
   return (
-    <Box size="xl" p="xl" role="main" aria-label="Task Management Application">
-      <Box ta="center" mb="lg">
-        <Group justify="center" gap="md" role="banner">
-          <Title order={1}>Task Management</Title>
-          <StartFreshButton />
-        </Group>
+    <>
+      <Text>Hello</Text>
+      <Box
+        size="xl"
+        p="xl"
+        role="main"
+        aria-label="Task Management Application"
+      >
+        <Box ta="center" mb="lg">
+          <Group justify="center" gap="md" role="banner">
+            <Title order={1}>Task Management</Title>
+            <StartFreshButton />
+          </Group>
+        </Box>
+        {isLoading ? <TaskTable tasks={tasks} /> : <TaskTable tasks={tasks} />}
       </Box>
-      {isLoading ? <TaskTable tasks={tasks} /> : <TaskTable tasks={tasks} />}
-    </Box>
+    </>
   );
 }
