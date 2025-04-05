@@ -49,6 +49,7 @@ export function TaskManagerContainer({
   return (
     <>
       <Text>Hello</Text>
+      <Text>My name</Text>
       <Box
         size="xl"
         p="xl"
