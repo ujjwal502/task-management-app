@@ -48,6 +48,7 @@ export function TaskManagerContainer({
 
   return (
     <Box size="xl" p="xl" role="main" aria-label="Task Management Application">
+      <h1>my name</h1>
       <Box ta="center" mb="lg">
         <Group justify="center" gap="md" role="banner">
           <Title order={1}>Task Management</Title>
