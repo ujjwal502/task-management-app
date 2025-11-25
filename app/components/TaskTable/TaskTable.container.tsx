@@ -26,6 +26,7 @@ import { ViewMode } from "@/app/shared/types/enums";
 import { KanbanBoard } from "../KanbanBoard";
 import { customFieldsStorage } from "@/app/shared/utils/custom-fields-storage";
 import { filterStorage } from "@/app/shared/utils/filter-storage";
+import { taskStats as TaskStats } from "../TaskStats/taskStats";
 
 export function TaskTableContainer({
   tasks: initialTasks,
@@ -395,6 +396,8 @@ export function TaskTableContainer({
           aria-label="Toggle view mode"
         />
       </Group>
+
+      <TaskStats tasks={tasks} onRefresh={() => console.log("refreshing stats...")} />
 
       <TaskTableHistory
         canUndo={canUndo}
